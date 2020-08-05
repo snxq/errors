@@ -106,6 +106,15 @@ func New(message string) error {
 	}
 }
 
+// NewWithCode returns an error with supplied message && code.
+func NewWithCode(code Ecode, message string) error {
+	return &fundamental{
+		code:  code,
+		msg:   message,
+		stack: callers(),
+	}
+}
+
 // Errorf formats according to a format specifier and returns the string
 // as a value that satisfies error.
 // Errorf also records the stack trace at the point it was called.
@@ -118,11 +127,14 @@ func Errorf(format string, args ...interface{}) error {
 
 // fundamental is an error that has a message and a stack, but no caller.
 type fundamental struct {
-	msg string
+	code Ecode
+	msg  string
 	*stack
 }
 
 func (f *fundamental) Error() string { return f.msg }
+
+func (f *fundamental) Code() Ecode { return f.code }
 
 func (f *fundamental) Format(s fmt.State, verb rune) {
 	switch verb {
